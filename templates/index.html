@@ -3,31 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiBoto Chatbot</title>
+    <title>Si Boto Chatbot</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #b2c2ad;
             padding: 20px;
+            background-image: url(/static/gambar1.jpg);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             background-color: #707d58;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
         }
         .chat-box {
             border: 1px solid #ddd;
             padding: 10px;
-            height: 300px;
+            height: 400px;
             overflow-y: scroll;
             background-color: #f9f9f9;
             border-radius: 10px;
+            display: flex;
+            flex-direction: column;
         }
-        .chat-box p {
+        .chat-box .message {
             margin: 5px 0;
+        }
+        .chat-box .user {
+            align-self: flex-end;
+            background-color: #d9f7be;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+        }
+        .chat-box .bot {
+            align-self: flex-start;
+            background-color: #f1f0f0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
         }
         input[type="text"] {
             width: 80%;
@@ -46,7 +66,7 @@
             cursor: pointer;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #415641;
         }
     </style>
 </head>
@@ -61,24 +81,39 @@
     </div>
 
     <script>
-        // Function to append messages to the chat box
+        
         function appendMessage(content, sender) {
             const chatBox = document.getElementById('chat-box');
-            const p = document.createElement('p');
-            p.textContent = sender + ": " + content;
-            chatBox.appendChild(p);
-            chatBox.scrollTop = chatBox.scrollHeight;  // Auto-scroll to the bottom
+            const wrapper = document.createElement('div');
+            wrapper.className = sender === 'SiBoto' ? 'bot message' : 'user message';
+
+            if (typeof content === 'string') {
+        
+                const p = document.createElement('p');
+                p.textContent = content;
+                wrapper.appendChild(p);
+            } else if (typeof content === 'object') {
+        
+                content.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = item; 
+                    wrapper.appendChild(listItem);
+                });
+            }
+
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight; 
         }
 
-        // Function to send message to the backend and get response
-        function sendMessage() {
-            const userInput = document.getElementById('user-input').value;
-            if (userInput.trim() === '') return;
 
-            // Show user's message
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value.trim();
+            if (userInput === '') return;
+
+
             appendMessage(userInput, "User");
 
-            // Send POST request to Flask server
+
             fetch('/get_response', {
                 method: 'POST',
                 headers: {
@@ -89,18 +124,23 @@
             .then(response => response.json())
             .then(data => {
                 const botResponse = data.response;
-                // Show bot's response
-                appendMessage(botResponse, "SiBoto");
-                // Clear input field
-                document.getElementById('user-input').value = '';
+
+                if (Array.isArray(botResponse)) {
+
+                    appendMessage(botResponse, "SiBoto");
+                } else {
+
+                    appendMessage(botResponse, "SiBoto");
+                }
+                document.getElementById('user-input').value = ''; 
             })
             .catch(error => {
-                appendMessage("Terjadi kesalahan. Silakan coba lagi.", "SiBoto");
+                appendMessage("Terjadi kesalahan. Silakan coba lagi nanti.", "SiBoto");
                 console.error("Error:", error);
             });
         }
 
-        // Add event listener to detect Enter key press
+        
         document.getElementById('user-input').addEventListener('keydown', function(event) {
             if (event.key === "Enter") {
                 sendMessage();
