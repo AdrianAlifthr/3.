@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai
 
 
-genai.configure(api_key="AIzaSyAv5YmcpdWtw-9CE5B1SnlalMJ0igHV8Wg")
+genai.configure(api_key="")
 
 generation_config = {
     "temperature": 1,
